@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail - Hablemos de tus cuotas pendientes - Banco Sabadell</title>
+    <link rel="icon" href="https://www.bancsabadell.com/favicon.ico" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Google Sans', 'Inter', sans-serif; background-color: #f6f8fc; }
+        .app-wrapper { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .email-item { opacity: 0; transform: translateY(20px); transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); display: none; }
+        .email-item.active { display: block; }
+        .email-item.visible { opacity: 1; transform: translateY(0); }
+        .clean-email { font-family: 'Montserrat', sans-serif; color: #333333; }
+        .sab-blue { color: #004481; }
+        .sab-bg-blue { background-color: #004481; }
+        .sab-accent { color: #00a3e0; }
+        .btn-agentforce { background-color: #f0f7fc; color: #004481; padding: 8px 20px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; border: 1px solid #004481; letter-spacing: 0.5px; }
+        .btn-primary { background-color: #004481; color: white; width: 100%; padding: 14px; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; border-radius: 4px; display: block; text-decoration: none; transition: background 0.3s; }
+        .btn-primary:hover { background-color: #003366; }
+        .nav-item { display: flex; align-items: center; padding: 0 12px 0 26px; height: 32px; font-size: 14px; color: #202124; border-radius: 0 16px 16px 0; margin-right: 16px; cursor: pointer; }
+        .nav-item:hover { background-color: #f1f3f4; }
+        .nav-item.active { background-color: #d3e3fd; color: #041e49; font-weight: 600; }
+        .nav-item i { width: 24px; font-size: 16px; margin-right: 18px; color: #444746; }
+        .nav-item.active i { color: #041e49; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #bdc1c6; }
+        .typing-cursor { animation: blink 1s step-end infinite; font-weight: normal; color: #004481; margin-left: 2px; }
+        @keyframes blink { 50% { opacity: 0; } }
+        .message-banner { display: none; background-color: #f9edbe; border: 1px solid #f0c36d; padding: 6px 12px; font-size: 13px; color: #000; border-radius: 2px; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); opacity: 0; transform: translateY(5px); align-items: center; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); width: max-content; margin-left: auto; margin-right: 8px; margin-bottom: 20px; margin-top: -12px; position: relative; z-index: 10; }
+        .message-banner.visible-banner { display: flex; opacity: 1; transform: translateY(0); }
+        @media (max-width: 768px) { .message-banner { margin-right: 0; margin-left: auto; } }
+        .banner-link { color: #000; text-decoration: underline; cursor: pointer; margin-left: 2px; }
+        .banner-link:hover { opacity: 0.7; }
+        .sab-logo-text { font-family: 'Montserrat', sans-serif; font-weight: 300; letter-spacing: 0.05em; color: white; }
+        .sab-logo-text strong { font-weight: 700; }
+        .hero-grad { background: linear-gradient(135deg, #004481 0%, #00a3e0 100%); }
+    </style>
+</head>
+<body>
+    <!-- CONFIG MODAL placeholder -->
+    <div id="configModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[100] flex items-center justify-center transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-[400px] max-w-[90%] border border-gray-100">
+            <div class="text-center mb-6 bg-[#004481] py-5 rounded-lg">
+                <div class="sab-logo-text text-2xl">Banco<strong>Sabadell</strong></div>
+            </div>
+            <div class="text-center mb-6">
+                <h2 class="text-xl font-bold text-[#004481]">Demo Agente de Recobros</h2>
+                <p class="text-sm text-gray-500 mt-1">Controla cuándo responde la IA al enviar un email</p>
+            </div>
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-3">Respuestas del Agente:</label>
+                    <div class="flex flex-col gap-3">
+                        <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                            <input type="radio" name="mode" value="manual" checked class="w-4 h-4 text-[#004481] focus:ring-[#004481]">
+                            <div>
+                                <span class="text-sm font-medium text-gray-800 block">Manual</span>
+                                <span class="text-xs text-gray-500">Pulsa una tecla para que la IA responda</span>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                            <input type="radio" name="mode" value="auto" class="w-4 h-4 text-[#004481] focus:ring-[#004481]">
+                            <div>
+                                <span class="text-sm font-medium text-gray-800 block">Automático</span>
+                                <span class="text-xs text-gray-500">Responde tras el retardo configurado</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div id="delayConfig" class="opacity-50 pointer-events-none transition-opacity duration-200 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">Tiempo de respuesta IA:</label>
+                    <div class="flex items-center gap-3">
+                        <input type="number" id="timeDelay" value="2.5" min="0.5" step="0.5" class="w-24 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#004481] focus:ring-1 focus:ring-[#004481] text-center font-medium">
+                        <span class="text-sm text-gray-600">segundos</span>
+                    </div>
+                </div>
+            </div>
+            <button id="startBtn" class="w-full mt-8 bg-[#00a3e0] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#0089bd] transition shadow-md flex justify-center items-center gap-2 tracking-wide">
+                <i class="fa-solid fa-play text-xs"></i> INICIAR DEMO
+            </button>
+        </div>
+    </div>
+
+    <div class="app-wrapper">
+        <header class="flex items-center justify-between px-4 py-2 bg-[#f6f8fc] shrink-0">
+            <div class="flex items-center gap-4 w-[238px] shrink-0">
+                <div class="p-3 rounded-full hover:bg-gray-200 cursor-pointer transition">
+                    <i class="fa-solid fa-bars text-gray-600 text-[18px]"></i>
+                </div>
+                <img src="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_1x_r5.png" alt="Gmail" class="h-10">
+            </div>
+            <div class="flex-1 max-w-[720px] px-2">
+                <div class="bg-[#eaf1fb] hover:bg-white hover:shadow flex items-center px-4 py-2.5 rounded-full transition-all">
+                    <i class="fa-solid fa-magnifying-glass text-gray-600 ml-1 mr-4"></i>
+                    <input type="text" placeholder="Buscar correo" class="bg-transparent border-none outline-none w-full text-[15px] text-gray-700">
+                    <i class="fa-solid fa-sliders text-gray-600 ml-4 p-2 rounded-full hover:bg-gray-100 cursor-pointer"></i>
+                </div>
+            </div>
+            <div class="flex items-center gap-1 shrink-0 px-2 text-gray-600">
+                <div class="p-2.5 rounded-full hover:bg-gray-200 cursor-pointer"><i class="fa-regular fa-circle-question text-[20px]"></i></div>
+                <div class="p-2.5 rounded-full hover:bg-gray-200 cursor-pointer"><i class="fa-solid fa-gear text-[20px]"></i></div>
+                <div class="p-2.5 rounded-full hover:bg-gray-200 cursor-pointer">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L13.8 8.4C14.4 10.5 16 12 18 12.6L24 14.4L18 16.2C16 16.8 14.4 18.3 13.8 20.4L12 26.4L10.2 20.4C9.6 18.3 8 16.8 6 16.2L0 14.4L6 12.6C8 12 9.6 10.5 10.2 8.4L12 2Z" transform="scale(0.83) translate(2.4 -1.2)" fill="url(#gemGrad)"/>
+                        <defs><linearGradient id="gemGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse"><stop stop-color="#4285F4"/><stop offset="0.5" stop-color="#9B72CB"/><stop offset="1" stop-color="#D96570"/></linearGradient></defs>
+                    </svg>
+                </div>
+                <div class="p-2.5 rounded-full hover:bg-gray-200 cursor-pointer mr-2"><i class="fa-solid fa-table-cells-large text-[18px]"></i></div>
+                <div class="w-8 h-8 bg-blue-600 rounded-full text-white flex items-center justify-center font-bold text-sm cursor-pointer ring-2 ring-white">L</div>
+            </div>
+        </header>
+
+        <div class="flex flex-1 overflow-hidden">
+            <aside class="w-[256px] hidden md:flex flex-col bg-[#f6f8fc] shrink-0 py-2">
+                <div class="pl-2 mb-4">
+                    <button class="bg-[#c2e7ff] hover:bg-[#b5defb] text-[#001d35] flex items-center gap-4 px-4 py-3.5 rounded-2xl font-medium text-[14px] transition shadow-sm mx-2">
+                        <i class="fa-solid fa-pencil text-[18px]"></i>
+                        Redactar
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto">
+                    <div class="nav-item active">
+                        <i class="fa-solid fa-inbox"></i>
+                        <span class="flex-1">Recibidos</span>
+                        <span class="text-xs font-bold mr-1">8</span>
+                    </div>
+                    <div class="nav-item"><i class="fa-regular fa-star"></i><span class="flex-1">Destacados</span></div>
+                    <div class="nav-item"><i class="fa-regular fa-clock"></i><span class="flex-1">Pospuestos</span></div>
+                    <div class="nav-item"><i class="fa-regular fa-bookmark"></i><span class="flex-1">Importantes</span></div>
+                    <div class="nav-item"><i class="fa-regular fa-paper-plane"></i><span class="flex-1">Enviados</span></div>
+                </div>
+            </aside>
+
+            <div class="flex-1 bg-white md:rounded-2xl md:mr-4 md:mb-4 shadow-sm flex flex-col overflow-hidden relative">
+                <div class="sticky top-0 bg-white px-2 py-2 flex items-center justify-between text-[#444746] z-10">
+                    <div class="flex items-center gap-1">
+                        <div class="p-2.5 rounded-full hover:bg-[#f1f3f4] cursor-pointer"><i class="fa-solid fa-arrow-left text-[15px]"></i></div>
+                        <div class="w-[1px] h-5 bg-gray-200 mx-2"></div>
+                        <div class="p-2.5 rounded-full hover:bg-[#f1f3f4] cursor-pointer" title="Archivar"><i class="fa-solid fa-box-archive text-[15px]"></i></div>
+                        <div class="p-2.5 rounded-full hover:bg-[#f1f3f4] cursor-pointer" title="Marcar como spam"><i class="fa-solid fa-circle-exclamation text-[15px]"></i></div>
+                        <div class="p-2.5 rounded-full hover:bg-[#f1f3f4] cursor-pointer" title="Eliminar"><i class="fa-regular fa-trash-can text-[15px]"></i></div>
+                        <div class="w-[1px] h-5 bg-gray-200 mx-2"></div>
+                        <div class="p-2.5 rounded-full hover:bg-[#f1f3f4] cursor-pointer" title="Marcar como no leído"><i class="fa-regular fa-envelope text-[15px]"></i></div>
+                        <div class="p-2.5 rounded-full hover:bg-[#f1f3f4] cursor-pointer" title="Mover a"><i class="fa-regular fa-folder text-[15px]"></i></div>
+                        <div class="p-2.5 rounded-full hover:bg-[#f1f3f4] cursor-pointer" title="Más"><i class="fa-solid fa-ellipsis-vertical text-[15px]"></i></div>
+                    </div>
+                    <div class="flex items-center gap-2 pr-2 text-[12px] text-gray-500">
+                        <span>20 de 17.068</span>
+                        <div class="p-1.5 rounded-full hover:bg-[#f1f3f4] cursor-pointer"><i class="fa-solid fa-chevron-left text-[12px]"></i></div>
+                        <div class="p-1.5 rounded-full hover:bg-[#f1f3f4] cursor-pointer"><i class="fa-solid fa-chevron-right text-[12px]"></i></div>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto px-4 md:px-14 py-4" id="scrollContainer">
+                    <div class="flex items-center justify-between mb-8 pl-12 pr-4 mt-2">
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <h1 class="text-[22px] text-[#1f1f1f] font-normal leading-tight">Hablemos de tus cuotas pendientes. Tienes opciones.</h1>
+                            <span class="bg-[#e8eaed] text-[#3c4043] text-[11px] font-medium px-2 py-0.5 rounded flex items-center gap-1.5 cursor-pointer hover:bg-gray-300">
+                                Recibidos <i class="fa-solid fa-xmark text-[10px]"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- EMAIL 1: PRIMER CONTACTO SABADELL -->
+                    <div class="email-item mb-2" id="email1">
+                        <div class="flex items-start gap-3 mb-2">
+                            <div class="w-10 h-10 border border-gray-200 rounded-full bg-[#004481] flex items-center justify-center shrink-0">
+                                <span class="text-white font-bold text-xs">S</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-[14px] text-[#202124]">Banco Sabadell <span class="text-xs font-normal text-gray-500">&lt;atencion@bancsabadell.com&gt;</span></span>
+                                        <span class="text-xs text-gray-500 flex items-center gap-1">para mí <i class="fa-solid fa-caret-down text-[10px]"></i></span>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-gray-500">
+                                        <span class="text-xs">sáb, 13 jun, 09:30 (hace 5 días)</span>
+                                        <i class="fa-regular fa-star cursor-pointer hover:text-gray-700"></i>
+                                        <i class="fa-regular fa-face-smile cursor-pointer hover:text-gray-700" title="Añadir reacción"></i>
+                                        <i class="fa-regular fa-face-smile cursor-pointer hover:text-gray-700" title="Añadir reacción"></i>
+                                        <i id="replyIcon1" class="fa-solid fa-reply cursor-pointer hover:text-gray-700" title="Responder"></i>
+                                        <i class="fa-solid fa-ellipsis-vertical cursor-pointer hover:text-gray-700"></i>
+                                        <i class="fa-solid fa-ellipsis-vertical cursor-pointer hover:text-gray-700"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pl-0 md:pl-12 mt-4 pb-8 border-b border-gray-100 relative">
+                            <div class="bg-[#e8eaed] -mx-4 md:-mx-14 px-4 md:px-14 py-8 flex justify-center">
+                            <div class="bg-white clean-email border border-gray-200 rounded-lg shadow-sm overflow-hidden w-full" style="max-width: 620px;">
+                                <div class="bg-[#004481] px-6 py-5 flex flex-col items-center justify-center border-b border-gray-100">
+                                    <div class="sab-logo-text text-3xl mb-3">Banco<strong>Sabadell</strong></div>
+                                    <span class="bg-[#00a3e0] text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">
+                                        Cuenta Expansión • Cliente desde 2018
+                                    </span>
+                                </div>
+                                <div>
+                                    <div class="relative hero-grad p-10">
+                                        <div class="text-center">
+                                            <i class="fa-solid fa-handshake text-white text-6xl mb-4 opacity-90"></i>
+                                            <p class="text-white uppercase tracking-[0.2em] text-xs font-bold mb-2">Atención personalizada</p>
+                                            <h1 class="text-white text-2xl font-light leading-tight drop-shadow-md">Estamos aquí para ayudarte.</h1>
+                                        </div>
+                                    </div>
+                                    <div class="p-6 md:p-8">
+                                        <div class="text-center mb-8">
+                                            <span class="btn-agentforce">
+                                                <i class="fa-solid fa-sparkles text-[#004481]"></i> Sabadell Asistente IA
+                                            </span>
+                                        </div>
+                                        <p class="text-[15px] leading-relaxed text-gray-700 mb-6 font-medium">
+                                            <em>Hola, Laura.</em><br><br>
+                                            Hemos detectado que tu <strong>Préstamo Personal Expansión</strong> tiene <strong>2 cuotas pendientes</strong> (octubre y noviembre). Sabemos que cualquiera puede pasar por un momento de tensión de liquidez, y queremos que sepas que <strong>no estás sola</strong>.
+                                        </p>
+                                        <p class="text-[15px] leading-relaxed text-gray-700 mb-6 font-medium">
+                                            Como cliente Expansión, ponemos a tu disposición nuestro nuevo asistente IA para encontrar contigo la solución que mejor se adapte a tu situación, <strong>sin compromiso y sin afectar tu historial</strong> mientras lo regularizamos juntos.
+                                        </p>
+                                        <div class="mt-8 relative bg-[#f0f7fc] border border-[#cce4f1] rounded-xl p-8 text-center">
+                                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#00a3e0] text-white text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
+                                                Sin coste • Sin compromiso
+                                            </div>
+                                            <h3 class="text-[18px] font-bold text-[#004481] mb-3 leading-tight mt-2">
+                                                Diseñemos juntos un plan a tu medida
+                                            </h3>
+                                            <p class="text-[14px] text-gray-600 mb-4">
+                                                <strong>Responde directamente a este correo</strong> contándonos tu situación. Nuestro Asistente IA analizará las opciones disponibles para ti (aplazamiento, ampliación de plazo, carencia temporal) y, por gestionar la regularización por este canal, podemos <strong>condonar las comisiones por descubierto</strong> ya devengadas.
+                                            </p>
+                                            <div class="bg-white border border-[#cce4f1] p-3 rounded text-[13px] text-gray-500 shadow-inner italic inline-block w-full text-left">
+                                                "He tenido un imprevisto laboral este trimestre y necesito reorganizar la cuota..."
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                            <div class="mt-4 flex gap-3" id="replyArea1">
+                                <button id="replyBtn1" class="border border-gray-300 rounded-full px-6 py-2 text-[#444746] font-medium text-[14px] hover:bg-[#f1f3f4] transition flex items-center gap-2 cursor-pointer shadow-sm">
+                                    <i class="fa-solid fa-reply"></i> Responder
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COMPOSE 1: LAURA RESPONDE EXPLICANDO SU SITUACIÓN -->
+                    <div class="email-item pt-4" id="compose1">
+                        <div class="flex items-start gap-3 mb-2">
+                            <div class="w-10 h-10 bg-blue-600 rounded-full text-white flex items-center justify-center font-bold text-lg shrink-0 z-10 shadow-sm">L</div>
+                            <div class="flex-1 border border-gray-200 rounded-xl shadow-lg bg-white overflow-hidden flex flex-col relative mt-1">
+                                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between text-[14px] text-gray-700 bg-white"><div class="flex items-center"><i class="fa-solid fa-reply mr-3 text-gray-500 text-[13px]"></i><span>Banco Sabadell <span class="text-gray-500">&lt;atencion@bancsabadell.com&gt;</span></span><i class="fa-solid fa-caret-down text-gray-500 text-[10px] ml-1"></i></div><i class="fa-solid fa-up-right-and-down-left-from-center text-gray-400 text-[12px] cursor-pointer" title="Pantalla completa"></i></div>
+                                <div class="p-5 text-[14px] text-[#202124] min-h-[120px] outline-none bg-white leading-relaxed cursor-text" contenteditable="false">
+                                    <div id="composeBody1" class="hidden">
+                                        <p>Buenos días,</p>
+                                        <p class="mt-2">Gracias por contactar de esta forma, la verdad es que llevo unas semanas dándole vueltas y no me atrevía a llamar.</p>
+                                        <p class="mt-2">Os explico: soy autónoma y este último trimestre se me han juntado <strong>dos clientes que han retrasado el pago de varias facturas</strong>. Tengo trabajo y los cobros van a entrar, pero no me cuadra el calendario con las cuotas del préstamo (estoy pagando <strong>340€ al mes</strong> de los <strong>15.000€ que pedí en 2023</strong> para reformar el local).</p>
+                                        <p class="mt-3">No quiero entrar en mora ni que esto afecte a mi calificación, lo que necesito es <strong>aire durante 2-3 meses</strong> hasta que se regularicen los cobros. ¿Qué opciones tengo?</p>
+                                    </div>
+                                </div>
+                                <div class="px-4 pt-2 pb-1 border-t border-gray-100 bg-white">
+                                    <div class="flex items-center gap-2 text-gray-500 text-[13px] flex-wrap">
+                                        <i class="fa-solid fa-rotate-left p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-rotate-right p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <span class="px-2 hover:bg-gray-100 rounded cursor-pointer">Sans Serif <i class="fa-solid fa-caret-down text-[10px] ml-0.5"></i></span>
+                                        <i class="fa-solid fa-text-height p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <span class="w-px h-4 bg-gray-200"></span>
+                                        <span class="font-bold cursor-pointer hover:bg-gray-100 px-1.5 rounded">B</span>
+                                        <span class="italic cursor-pointer hover:bg-gray-100 px-1.5 rounded">I</span>
+                                        <span class="underline cursor-pointer hover:bg-gray-100 px-1.5 rounded">U</span>
+                                        <i class="fa-solid fa-palette p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <span class="w-px h-4 bg-gray-200"></span>
+                                        <i class="fa-solid fa-align-left p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-list-ol p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-list-ul p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-outdent p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-indent p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-quote-right p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-strikethrough p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                    </div>
+                                </div>
+                                <div class="px-4 py-3 bg-white flex items-center justify-between">
+                                    <div class="flex items-center gap-1">
+                                        <div class="flex items-center bg-[#0b57d0] hover:bg-[#0842a0] text-white rounded-full overflow-hidden shadow-sm transition">
+                                            <button id="sendBtn1" class="px-5 py-1.5 font-medium text-sm cursor-pointer">Enviar</button>
+                                            <span class="border-l border-blue-400 px-2 py-1.5 cursor-pointer hover:bg-[#0842a0]"><i class="fa-solid fa-caret-down text-[12px]"></i></span>
+                                        </div>
+                                        <div class="flex items-center gap-1 ml-2 text-gray-500 text-[14px]">
+                                            <span class="px-2 py-1 hover:bg-gray-100 rounded-full cursor-pointer font-bold text-[13px]">A<span class="text-[10px]">a</span></span>
+                                            <i class="fa-solid fa-paperclip p-1.5 hover:bg-gray-100 rounded-full cursor-pointer rotate-45"></i>
+                                            <i class="fa-solid fa-link p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-regular fa-face-smile p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-brands fa-google-drive p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-regular fa-image p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-solid fa-lock p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-solid fa-pen p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-solid fa-ellipsis-vertical p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                        </div>
+                                    </div>
+                                    <i class="fa-regular fa-trash-can p-2 hover:bg-gray-100 rounded-full cursor-pointer text-gray-500"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EMAIL 2: PREGUNTA ENVIADA -->
+                    <div class="email-item pt-4" id="email2">
+                        <div class="flex items-start gap-3 mb-2">
+                            <div class="w-10 h-10 bg-blue-600 rounded-full text-white flex items-center justify-center font-bold text-lg shrink-0">L</div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-[14px] text-[#202124]">Laura Fernández <span class="text-xs font-normal text-gray-500">&lt;laura.fernandez@gmail.com&gt;</span></span>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-gray-500">
+                                        <span class="text-xs">14:07 (hace 2 horas)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pl-0 md:pl-12 mt-2 pb-6 border-b border-gray-100">
+                            <div class="text-[14px] text-[#202124] leading-relaxed max-w-3xl">
+                                <p>Buenos días,</p>
+                                <p class="mt-2">Gracias por contactar de esta forma, la verdad es que llevo unas semanas dándole vueltas y no me atrevía a llamar.</p>
+                                <p class="mt-2">Os explico: soy autónoma y este último trimestre se me han juntado <strong>dos clientes que han retrasado el pago de varias facturas</strong>. Tengo trabajo y los cobros van a entrar, pero no me cuadra el calendario con las cuotas del préstamo (estoy pagando <strong>340€ al mes</strong> de los <strong>15.000€ que pedí en 2023</strong> para reformar el local).</p>
+                                <p class="mt-3">No quiero entrar en mora ni que esto afecte a mi calificación, lo que necesito es <strong>aire durante 2-3 meses</strong> hasta que se regularicen los cobros. ¿Qué opciones tengo?</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EMAIL 3: IA SABADELL PROPONE 2 OPCIONES -->
+                    <div class="email-item pt-4" id="email3">
+                        <div class="flex items-start gap-3 mb-2">
+                            <div class="w-10 h-10 border border-gray-200 rounded-full bg-[#004481] flex items-center justify-center shrink-0">
+                                <span class="text-white font-bold text-xs">S</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-[14px] text-[#202124]">Sabadell Asistente <span class="text-xs font-normal text-gray-500">&lt;asistente@bancsabadell.com&gt;</span></span>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-gray-500">
+                                        <span class="text-xs">14:08 (hace 2 horas)</span>
+                                        <i class="fa-regular fa-face-smile cursor-pointer hover:text-gray-700" title="Añadir reacción"></i>
+                                        <i id="replyIcon2" class="fa-solid fa-reply cursor-pointer hover:text-gray-700" title="Responder"></i>
+                                        <i class="fa-solid fa-ellipsis-vertical cursor-pointer hover:text-gray-700"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pl-0 md:pl-12 mt-2 pb-6 border-b border-gray-100 relative">
+                            <div class="text-[14px] text-[#202124] leading-relaxed max-w-3xl">
+                                <p>Hola Laura, gracias por contarnos tu situación con esa transparencia. Lo que describes es muy habitual entre clientes autónomos y, justamente porque tienes <strong>actividad en marcha y cobros previstos</strong>, lo razonable no es ir a impago: es reorganizar tu calendario.</p>
+                                <p class="mt-3">He revisado tu préstamo (saldo pendiente <strong>9.842€</strong>, plazo restante <strong>32 meses</strong>) y, dada tu antigüedad como cliente Expansión y tu historial de pagos hasta ahora impecable, <strong>te puedo plantear dos vías compatibles con lo que necesitas</strong>:</p>
+
+                                <div class="flex flex-col lg:flex-row gap-4 py-4 mb-2">
+                                    <div class="flex-1 bg-white border border-gray-200 hover:border-[#00a3e0] transition rounded-xl overflow-hidden shadow-sm flex flex-col">
+                                        <div class="h-32 hero-grad relative flex items-center justify-center">
+                                            <i class="fa-solid fa-pause text-white text-5xl opacity-90"></i>
+                                        </div>
+                                        <div class="p-4 flex-1 flex flex-col">
+                                            <h4 class="font-bold text-[#004481] text-[15px] leading-tight">Carencia parcial de capital</h4>
+                                            <p class="text-[11px] text-[#00a3e0] mt-1 font-bold uppercase tracking-wide">3 meses • Solo intereses</p>
+                                            <p class="text-[12px] text-gray-700 mt-2 leading-relaxed flex-1">Durante 3 meses pagas <strong>solo los intereses (~52€/mes)</strong> en lugar de la cuota completa. El plazo del préstamo se mantiene; al volver a la cuota normal, ese capital no amortizado se redistribuye en las cuotas restantes (subirían unos <strong>+33€/mes</strong>).</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 bg-white border border-gray-200 hover:border-[#00a3e0] transition rounded-xl overflow-hidden shadow-sm flex flex-col">
+                                        <div class="h-32 hero-grad relative flex items-center justify-center">
+                                            <i class="fa-solid fa-arrows-left-right-to-line text-white text-5xl opacity-90"></i>
+                                        </div>
+                                        <div class="p-4 flex-1 flex flex-col">
+                                            <h4 class="font-bold text-[#004481] text-[15px] leading-tight">Ampliación de plazo</h4>
+                                            <p class="text-[11px] text-[#00a3e0] mt-1 font-bold uppercase tracking-wide">+12 meses • Cuota más baja</p>
+                                            <p class="text-[12px] text-gray-700 mt-2 leading-relaxed flex-1">Alargamos el préstamo 12 meses (de 32 a 44). La cuota baja a <strong>~258€/mes</strong> de forma estable. Pagas algo más de intereses totales (<strong>+340€</strong> al final), pero ganas margen permanente, no solo 3 meses.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p class="mt-2 font-semibold text-[#004481]">¿Cuál encaja mejor con tu previsión de cobros?</p>
+                            </div>
+                            <div class="mt-4 flex gap-3" id="replyArea2">
+                                <button id="replyBtn2" class="border border-gray-300 rounded-full px-6 py-2 text-[#444746] font-medium text-[14px] hover:bg-[#f1f3f4] transition flex items-center gap-2 cursor-pointer shadow-sm">
+                                    <i class="fa-solid fa-reply"></i> Responder
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COMPOSE 2: LAURA ELIGE Y PREGUNTA -->
+                    <div class="email-item pt-4" id="compose2">
+                        <div class="flex items-start gap-3 mb-2">
+                            <div class="w-10 h-10 bg-blue-600 rounded-full text-white flex items-center justify-center font-bold text-lg shrink-0 z-10 shadow-sm">L</div>
+                            <div class="flex-1 border border-gray-200 rounded-xl shadow-lg bg-white overflow-hidden flex flex-col relative mt-1">
+                                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between text-[14px] text-gray-700 bg-white"><div class="flex items-center"><i class="fa-solid fa-reply mr-3 text-gray-500 text-[13px]"></i><span>Sabadell Asistente <span class="text-gray-500">&lt;asistente@bancsabadell.com&gt;</span></span><i class="fa-solid fa-caret-down text-gray-500 text-[10px] ml-1"></i></div><i class="fa-solid fa-up-right-and-down-left-from-center text-gray-400 text-[12px] cursor-pointer" title="Pantalla completa"></i></div>
+                                <div class="p-5 text-[14px] text-[#202124] min-h-[100px] outline-none bg-white leading-relaxed cursor-text" contenteditable="false">
+                                    <div id="composeBody2" class="hidden">
+                                        <p>Me interesa más la <strong>carencia parcial de 3 meses</strong>. Sé que mis cobros llegarán antes de marzo y prefiero no arrastrar la subida de cuota durante 12 meses si no es necesario.</p>
+                                        <p class="mt-2">Pero antes de decidir tengo dudas: <strong>¿esto va a aparecer en el CIRBE o me marca como cliente con problemas?</strong> Y por otro lado, <strong>¿tendría que ir a la oficina a firmar algo o se puede gestionar todo digitalmente?</strong></p>
+                                    </div>
+                                </div>
+                                <div class="px-4 pt-2 pb-1 border-t border-gray-100 bg-white">
+                                    <div class="flex items-center gap-2 text-gray-500 text-[13px] flex-wrap">
+                                        <i class="fa-solid fa-rotate-left p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-rotate-right p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <span class="px-2 hover:bg-gray-100 rounded cursor-pointer">Sans Serif <i class="fa-solid fa-caret-down text-[10px] ml-0.5"></i></span>
+                                        <i class="fa-solid fa-text-height p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <span class="w-px h-4 bg-gray-200"></span>
+                                        <span class="font-bold cursor-pointer hover:bg-gray-100 px-1.5 rounded">B</span>
+                                        <span class="italic cursor-pointer hover:bg-gray-100 px-1.5 rounded">I</span>
+                                        <span class="underline cursor-pointer hover:bg-gray-100 px-1.5 rounded">U</span>
+                                        <i class="fa-solid fa-palette p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <span class="w-px h-4 bg-gray-200"></span>
+                                        <i class="fa-solid fa-align-left p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-list-ol p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-list-ul p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-outdent p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-indent p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-quote-right p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-strikethrough p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                    </div>
+                                </div>
+                                <div class="px-4 py-3 bg-white flex items-center justify-between">
+                                    <div class="flex items-center gap-1">
+                                        <div class="flex items-center bg-[#0b57d0] hover:bg-[#0842a0] text-white rounded-full overflow-hidden shadow-sm transition">
+                                            <button id="sendBtn2" class="px-5 py-1.5 font-medium text-sm cursor-pointer">Enviar</button>
+                                            <span class="border-l border-blue-400 px-2 py-1.5 cursor-pointer hover:bg-[#0842a0]"><i class="fa-solid fa-caret-down text-[12px]"></i></span>
+                                        </div>
+                                        <div class="flex items-center gap-1 ml-2 text-gray-500 text-[14px]">
+                                            <span class="px-2 py-1 hover:bg-gray-100 rounded-full cursor-pointer font-bold text-[13px]">A<span class="text-[10px]">a</span></span>
+                                            <i class="fa-solid fa-paperclip p-1.5 hover:bg-gray-100 rounded-full cursor-pointer rotate-45"></i>
+                                            <i class="fa-solid fa-link p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-regular fa-face-smile p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-brands fa-google-drive p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-regular fa-image p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-solid fa-lock p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-solid fa-pen p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-solid fa-ellipsis-vertical p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                        </div>
+                                    </div>
+                                    <i class="fa-regular fa-trash-can p-2 hover:bg-gray-100 rounded-full cursor-pointer text-gray-500"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EMAIL 4: PREGUNTA ENVIADA -->
+                    <div class="email-item pt-4" id="email4">
+                        <div class="flex items-start gap-3 mb-2">
+                            <div class="w-10 h-10 bg-blue-600 rounded-full text-white flex items-center justify-center font-bold text-lg shrink-0">L</div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-[14px] text-[#202124]">Laura Fernández <span class="text-xs font-normal text-gray-500">&lt;laura.fernandez@gmail.com&gt;</span></span>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-gray-500">
+                                        <span class="text-xs">14:30 (hace 30 minutos)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pl-0 md:pl-12 mt-2 pb-6 border-b border-gray-100">
+                            <div class="text-[14px] text-[#202124] leading-relaxed max-w-3xl">
+                                <p>Me interesa más la <strong>carencia parcial de 3 meses</strong>. Sé que mis cobros llegarán antes de marzo y prefiero no arrastrar la subida de cuota durante 12 meses si no es necesario.</p>
+                                <p class="mt-2">Pero antes de decidir tengo dudas: <strong>¿esto va a aparecer en el CIRBE o me marca como cliente con problemas?</strong> Y por otro lado, <strong>¿tendría que ir a la oficina a firmar algo o se puede gestionar todo digitalmente?</strong></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EMAIL 4.1: IA RESUELVE DUDAS Y PIDE DETALLES -->
+                    <div class="email-item pt-4" id="email4_1">
+                        <div class="flex items-start gap-3 mb-2">
+                            <div class="w-10 h-10 border border-gray-200 rounded-full bg-[#004481] flex items-center justify-center shrink-0">
+                                <span class="text-white font-bold text-xs">S</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-[14px] text-[#202124]">Sabadell Asistente <span class="text-xs font-normal text-gray-500">&lt;asistente@bancsabadell.com&gt;</span></span>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-gray-500">
+                                        <span class="text-xs">14:32 (hace 28 minutos)</span>
+                                        <i class="fa-regular fa-face-smile cursor-pointer hover:text-gray-700" title="Añadir reacción"></i>
+                                        <i id="replyIcon4_1" class="fa-solid fa-reply cursor-pointer hover:text-gray-700" title="Responder"></i>
+                                        <i class="fa-solid fa-ellipsis-vertical cursor-pointer hover:text-gray-700"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pl-0 md:pl-12 mt-2 pb-6 border-b border-gray-100 relative">
+                            <div class="text-[14px] text-[#202124] leading-relaxed max-w-3xl">
+                                <p>Dos preguntas muy lógicas, Laura, te las contesto sin rodeos:</p>
+                                <ul class="mt-3 space-y-3">
+                                    <li><i class="fa-solid fa-shield-halved text-[#00a3e0] w-5"></i> <strong>CIRBE / scoring:</strong> una <em>novación</em> de carencia <strong>NO te marca como impagada</strong>. Aparece en CIRBE como una modificación contractual ordinaria, no como mora. <strong>Justo por eso te contactamos ahora</strong>: si dejas que pase el día 90 sin actuar, ahí sí que entrarías en mora técnica y eso sí impactaría tu scoring durante años.</li>
+                                    <li><i class="fa-solid fa-mobile-screen-button text-[#00a3e0] w-5"></i> <strong>Gestión 100% digital:</strong> firmas con <em>SignaturIT</em> desde la app de Sabadell. No necesitas ir a oficina. La tramitación tarda <strong>24-48h</strong> desde que firmas.</li>
+                                </ul>
+                                <p class="mt-4">Para preparar el documento de novación con cifras exactas, necesito confirmar dos cosas:</p>
+                                <div class="mt-4 p-5 bg-[#f0f7fc] border border-[#cce4f1] rounded-xl shadow-sm">
+                                    <p class="mb-3 text-[#004481]"><strong>1. Mes de inicio de la carencia:</strong> ¿prefieres que arranque ya en <strong>diciembre</strong> (regularizando primero las dos cuotas atrasadas con el saldo en cuenta) o que la apliquemos a partir de <strong>enero</strong>?</p>
+                                    <p class="text-[#004481]"><strong>2. Domiciliación de ingresos:</strong> ¿siguen entrando tus facturas en la cuenta Expansión asociada al préstamo? Es relevante porque condiciona algunas comisiones que podemos bonificar.</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex gap-3" id="replyArea4_1">
+                                <button id="replyBtn4_1" class="border border-gray-300 rounded-full px-6 py-2 text-[#444746] font-medium text-[14px] hover:bg-[#f1f3f4] transition flex items-center gap-2 cursor-pointer shadow-sm">
+                                    <i class="fa-solid fa-reply"></i> Responder
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COMPOSE 2.5: LAURA RESPONDE DETALLES -->
+                    <div class="email-item pt-4" id="compose2_5">
+                        <div class="flex items-start gap-3 mb-2">
+                            <div class="w-10 h-10 bg-blue-600 rounded-full text-white flex items-center justify-center font-bold text-lg shrink-0 z-10 shadow-sm">L</div>
+                            <div class="flex-1 border border-gray-200 rounded-xl shadow-lg bg-white overflow-hidden flex flex-col relative mt-1">
+                                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between text-[14px] text-gray-700 bg-white"><div class="flex items-center"><i class="fa-solid fa-reply mr-3 text-gray-500 text-[13px]"></i><span>Sabadell Asistente <span class="text-gray-500">&lt;asistente@bancsabadell.com&gt;</span></span><i class="fa-solid fa-caret-down text-gray-500 text-[10px] ml-1"></i></div><i class="fa-solid fa-up-right-and-down-left-from-center text-gray-400 text-[12px] cursor-pointer" title="Pantalla completa"></i></div>
+                                <div class="p-5 text-[14px] text-[#202124] min-h-[80px] outline-none bg-white leading-relaxed cursor-text" contenteditable="false">
+                                    <div id="composeBody2_5" class="hidden">
+                                        <p>Lo del CIRBE me deja mucho más tranquila, gracias por aclararlo.</p>
+                                        <p class="mt-2">Prefiero <strong>arrancar la carencia desde diciembre</strong>: tengo justo el dinero para cubrir las dos cuotas atrasadas y a partir de ahí entrar en el plan nuevo, así no encadeno una segunda mensualidad fallida.</p>
+                                        <p class="mt-2">Y sí, <strong>todas mis facturas siguen entrando en la cuenta Expansión</strong>, igual que la cuota del préstamo. No he movido nada.</p>
+                                    </div>
+                                </div>
+                                <div class="px-4 pt-2 pb-1 border-t border-gray-100 bg-white">
+                                    <div class="flex items-center gap-2 text-gray-500 text-[13px] flex-wrap">
+                                        <i class="fa-solid fa-rotate-left p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-rotate-right p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <span class="px-2 hover:bg-gray-100 rounded cursor-pointer">Sans Serif <i class="fa-solid fa-caret-down text-[10px] ml-0.5"></i></span>
+                                        <i class="fa-solid fa-text-height p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <span class="w-px h-4 bg-gray-200"></span>
+                                        <span class="font-bold cursor-pointer hover:bg-gray-100 px-1.5 rounded">B</span>
+                                        <span class="italic cursor-pointer hover:bg-gray-100 px-1.5 rounded">I</span>
+                                        <span class="underline cursor-pointer hover:bg-gray-100 px-1.5 rounded">U</span>
+                                        <i class="fa-solid fa-palette p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <span class="w-px h-4 bg-gray-200"></span>
+                                        <i class="fa-solid fa-align-left p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-list-ol p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-list-ul p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-outdent p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-indent p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-quote-right p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-strikethrough p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                    </div>
+                                </div>
+                                <div class="px-4 py-3 bg-white flex items-center justify-between">
+                                    <div class="flex items-center gap-1">
+                                        <div class="flex items-center bg-[#0b57d0] hover:bg-[#0842a0] text-white rounded-full overflow-hidden shadow-sm transition">
+                                            <button id="sendBtn2_5" class="px-5 py-1.5 font-medium text-sm cursor-pointer">Enviar</button>
+                                            <span class="border-l border-blue-400 px-2 py-1.5 cursor-pointer hover:bg-[#0842a0]"><i class="fa-solid fa-caret-down text-[12px]"></i></span>
+                                        </div>
+                                        <div class="flex items-center gap-1 ml-2 text-gray-500 text-[14px]">
+                                            <span class="px-2 py-1 hover:bg-gray-100 rounded-full cursor-pointer font-bold text-[13px]">A<span class="text-[10px]">a</span></span>
+                                            <i class="fa-solid fa-paperclip p-1.5 hover:bg-gray-100 rounded-full cursor-pointer rotate-45"></i>
+                                            <i class="fa-solid fa-link p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-regular fa-face-smile p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-brands fa-google-drive p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-regular fa-image p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-solid fa-lock p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-solid fa-pen p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-solid fa-ellipsis-vertical p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                        </div>
+                                    </div>
+                                    <i class="fa-regular fa-trash-can p-2 hover:bg-gray-100 rounded-full cursor-pointer text-gray-500"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EMAIL 4.2: RESPUESTA DETALLES ENVIADA -->
+                    <div class="email-item pt-4" id="email4_2">
+                        <div class="flex items-start gap-3 mb-2">
+                            <div class="w-10 h-10 bg-blue-600 rounded-full text-white flex items-center justify-center font-bold text-lg shrink-0">L</div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-[14px] text-[#202124]">Laura Fernández <span class="text-xs font-normal text-gray-500">&lt;laura.fernandez@gmail.com&gt;</span></span>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-gray-500">
+                                        <span class="text-xs">14:35 (hace 25 minutos)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pl-0 md:pl-12 mt-2 pb-6 border-b border-gray-100">
+                            <div class="text-[14px] text-[#202124] leading-relaxed max-w-3xl">
+                                <p>Lo del CIRBE me deja mucho más tranquila, gracias por aclararlo.</p>
+                                <p class="mt-2">Prefiero <strong>arrancar la carencia desde diciembre</strong>: tengo justo el dinero para cubrir las dos cuotas atrasadas y a partir de ahí entrar en el plan nuevo, así no encadeno una segunda mensualidad fallida.</p>
+                                <p class="mt-2">Y sí, <strong>todas mis facturas siguen entrando en la cuenta Expansión</strong>, igual que la cuota del préstamo. No he movido nada.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EMAIL 4.3: IA PRESENTA PLAN DETALLADO + ADD-ONS -->
+                    <div class="email-item pt-4" id="email4_3">
+                        <div class="flex items-start gap-3 mb-2">
+                            <div class="w-10 h-10 border border-gray-200 rounded-full bg-[#004481] flex items-center justify-center shrink-0">
+                                <span class="text-white font-bold text-xs">S</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-[14px] text-[#202124]">Sabadell Asistente <span class="text-xs font-normal text-gray-500">&lt;asistente@bancsabadell.com&gt;</span></span>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-gray-500">
+                                        <span class="text-xs">14:36 (hace 24 minutos)</span>
+                                        <i class="fa-regular fa-face-smile cursor-pointer hover:text-gray-700" title="Añadir reacción"></i>
+                                        <i id="replyIcon4_3" class="fa-solid fa-reply cursor-pointer hover:text-gray-700" title="Responder"></i>
+                                        <i class="fa-solid fa-ellipsis-vertical cursor-pointer hover:text-gray-700"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pl-0 md:pl-12 mt-2 pb-6 border-b border-gray-100 relative">
+                            <div class="text-[14px] text-[#202124] leading-relaxed max-w-3xl">
+                                <p>Perfecto, Laura. Con esos datos he podido dejar el plan listo. Como gestionas la regularización por este canal, te he aplicado <strong>condonación de la comisión por descubierto (-25€)</strong> de noviembre y, al mantener tus ingresos domiciliados, conservas la <strong>bonificación Cuenta Expansión</strong> sin perder el escalado. Este es el resumen del acuerdo:</p>
+
+                                <div class="bg-gray-50 border border-gray-200 rounded-xl p-5 my-4 max-w-lg">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <span class="text-sm text-gray-600">Préstamo</span>
+                                        <span class="text-sm font-semibold text-right">Préstamo Personal Expansión<br>Saldo pendiente: 9.842 €</span>
+                                    </div>
+                                    <div class="flex justify-between items-center mb-3">
+                                        <span class="text-sm text-gray-600">Solución</span>
+                                        <span class="text-sm font-semibold text-right">Carencia parcial 3 meses</span>
+                                    </div>
+                                    <div class="flex justify-between items-center mb-3">
+                                        <span class="text-sm text-gray-600">Período</span>
+                                        <span class="text-sm font-semibold">Dic '25 → Feb '26</span>
+                                    </div>
+                                    <div class="flex justify-between items-center mb-3">
+                                        <span class="text-sm text-gray-600">Cuota durante carencia</span>
+                                        <span class="text-sm font-semibold text-[#16a34a]">52 €/mes (solo intereses)</span>
+                                    </div>
+                                    <div class="flex justify-between items-center pt-3 border-t border-gray-200 mt-2">
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-[#004481]">Cuota tras carencia</span>
+                                            <span class="text-[10px] text-[#16a34a] font-bold uppercase tracking-wider mt-1">Comisión descubierto condonada</span>
+                                            <span class="text-[10px] text-[#16a34a] font-bold uppercase tracking-wider">Bonif. Expansión mantenida</span>
+                                        </div>
+                                        <div class="text-right flex items-center gap-2 mt-1">
+                                            <span class="text-sm line-through text-gray-400">340 €</span>
+                                            <span class="text-xl font-black text-[#004481]">373 €</span>
+                                        </div>
+                                    </div>
+                                    <button class="w-full mt-4 bg-[#004481] hover:bg-[#003366] text-white font-bold py-2.5 rounded-lg flex justify-center items-center gap-2 transition cursor-pointer text-xs tracking-wide">
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i> VER CUADRO DE AMORTIZACIÓN
+                                    </button>
+                                </div>
+
+                                <p class="mt-4">Y, ya que estamos viendo tu situación financiera global, hay <strong>dos productos vinculados a tu perfil de autónoma</strong> que pueden encajarte. <em>No tienes que decidirlos ahora</em>, los dejo aquí para que los valores con calma:</p>
+
+                                <div class="mt-4 space-y-3 bg-[#f0f7fc] p-5 border border-[#cce4f1] rounded-lg">
+                                    <div class="flex justify-between items-center border-b border-[#cce4f1] pb-3">
+                                        <div>
+                                            <strong class="text-[#004481]">1. Línea de Crédito Pro 5.000 €</strong>
+                                            <p class="text-xs text-gray-600 mt-1">Línea revolving para circulante: solo pagas intereses por lo dispuesto. Útil para cubrir baches de tesorería como el actual sin tocar el préstamo. <em>Pre-aprobada</em> según tu historial.</p>
+                                        </div>
+                                        <span class="font-bold text-[#00a3e0] ml-4 shrink-0">TAE 6,95%</span>
+                                    </div>
+                                    <div class="flex justify-between items-center pt-2">
+                                        <div>
+                                            <strong class="text-[#004481]">2. Seguro de Protección de Pagos</strong>
+                                            <p class="text-xs text-gray-600 mt-1">Cubre la cuota del préstamo durante 12 meses ante baja por enfermedad, accidente o caída de ingresos &gt;30% en autónomos. Pensado justo para situaciones como la actual.</p>
+                                        </div>
+                                        <span class="font-bold text-[#00a3e0] ml-4 shrink-0">+12 €/mes</span>
+                                    </div>
+                                </div>
+
+                                <p class="mt-4">¿Te interesa que te lo amplíe o seguimos con la carencia tal cual?</p>
+                            </div>
+                            <div class="mt-4 flex gap-3" id="replyArea4_3">
+                                <button id="replyBtn4_3" class="border border-gray-300 rounded-full px-6 py-2 text-[#444746] font-medium text-[14px] hover:bg-[#f1f3f4] transition flex items-center gap-2 cursor-pointer shadow-sm">
+                                    <i class="fa-solid fa-reply"></i> Responder
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COMPOSE 2.7: LAURA TIENE DUDAS SOBRE PRODUCTOS -->
+                    <div class="email-item pt-4" id="compose2_7">
+                        <div class="flex items-start gap-3 mb-2">
+                            <div class="w-10 h-10 bg-blue-600 rounded-full text-white flex items-center justify-center font-bold text-lg shrink-0 z-10 shadow-sm">L</div>
+                            <div class="flex-1 border border-gray-200 rounded-xl shadow-lg bg-white overflow-hidden flex flex-col relative mt-1">
+                                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between text-[14px] text-gray-700 bg-white"><div class="flex items-center"><i class="fa-solid fa-reply mr-3 text-gray-500 text-[13px]"></i><span>Sabadell Asistente <span class="text-gray-500">&lt;asistente@bancsabadell.com&gt;</span></span><i class="fa-solid fa-caret-down text-gray-500 text-[10px] ml-1"></i></div><i class="fa-solid fa-up-right-and-down-left-from-center text-gray-400 text-[12px] cursor-pointer" title="Pantalla completa"></i></div>
+                                <div class="p-5 text-[14px] text-[#202124] min-h-[80px] outline-none bg-white leading-relaxed cursor-text" contenteditable="false">
+                                    <div id="composeBody2_7" class="hidden">
+                                        <p>El plan de carencia me cuadra y los números son claros. Antes de firmar quiero entender bien las dos opciones que mencionas, sobre todo porque no quiero meterme en otro producto que luego me complique.</p>
+                                        <p class="mt-2">La <strong>línea de crédito Pro</strong> me suena interesante, pero ¿qué pasa si no la uso? ¿Tiene comisión de no disposición o de mantenimiento? Es lo que me asusta de las revolving.</p>
+                                        <p class="mt-2">Y del <strong>seguro de protección de pagos</strong> me preocupa la letra pequeña: ¿qué cuenta exactamente como "caída de ingresos &gt;30%" para un autónomo? Necesitaría ver casos concretos antes de contratarlo.</p>
+                                    </div>
+                                </div>
+                                <div class="px-4 pt-2 pb-1 border-t border-gray-100 bg-white">
+                                    <div class="flex items-center gap-2 text-gray-500 text-[13px] flex-wrap">
+                                        <i class="fa-solid fa-rotate-left p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-rotate-right p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <span class="px-2 hover:bg-gray-100 rounded cursor-pointer">Sans Serif <i class="fa-solid fa-caret-down text-[10px] ml-0.5"></i></span>
+                                        <i class="fa-solid fa-text-height p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <span class="w-px h-4 bg-gray-200"></span>
+                                        <span class="font-bold cursor-pointer hover:bg-gray-100 px-1.5 rounded">B</span>
+                                        <span class="italic cursor-pointer hover:bg-gray-100 px-1.5 rounded">I</span>
+                                        <span class="underline cursor-pointer hover:bg-gray-100 px-1.5 rounded">U</span>
+                                        <i class="fa-solid fa-palette p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <span class="w-px h-4 bg-gray-200"></span>
+                                        <i class="fa-solid fa-align-left p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-list-ol p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-list-ul p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-outdent p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-indent p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-quote-right p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-strikethrough p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                    </div>
+                                </div>
+                                <div class="px-4 py-3 bg-white flex items-center justify-between">
+                                    <div class="flex items-center gap-1">
+                                        <div class="flex items-center bg-[#0b57d0] hover:bg-[#0842a0] text-white rounded-full overflow-hidden shadow-sm transition">
+                                            <button id="sendBtn2_7" class="px-5 py-1.5 font-medium text-sm cursor-pointer">Enviar</button>
+                                            <span class="border-l border-blue-400 px-2 py-1.5 cursor-pointer hover:bg-[#0842a0]"><i class="fa-solid fa-caret-down text-[12px]"></i></span>
+                                        </div>
+                                        <div class="flex items-center gap-1 ml-2 text-gray-500 text-[14px]">
+                                            <span class="px-2 py-1 hover:bg-gray-100 rounded-full cursor-pointer font-bold text-[13px]">A<span class="text-[10px]">a</span></span>
+                                            <i class="fa-solid fa-paperclip p-1.5 hover:bg-gray-100 rounded-full cursor-pointer rotate-45"></i>
+                                            <i class="fa-solid fa-link p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-regular fa-face-smile p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-brands fa-google-drive p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-regular fa-image p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-solid fa-lock p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-solid fa-pen p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-solid fa-ellipsis-vertical p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                        </div>
+                                    </div>
+                                    <i class="fa-regular fa-trash-can p-2 hover:bg-gray-100 rounded-full cursor-pointer text-gray-500"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EMAIL 4.4: DUDAS ENVIADAS -->
+                    <div class="email-item pt-4" id="email4_4">
+                        <div class="flex items-start gap-3 mb-2">
+                            <div class="w-10 h-10 bg-blue-600 rounded-full text-white flex items-center justify-center font-bold text-lg shrink-0">L</div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-[14px] text-[#202124]">Laura Fernández <span class="text-xs font-normal text-gray-500">&lt;laura.fernandez@gmail.com&gt;</span></span>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-gray-500">
+                                        <span class="text-xs">14:45 (hace 10 minutos)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pl-0 md:pl-12 mt-2 pb-6 border-b border-gray-100">
+                            <div class="text-[14px] text-[#202124] leading-relaxed max-w-3xl">
+                                <p>El plan de carencia me cuadra y los números son claros. Antes de firmar quiero entender bien las dos opciones que mencionas, sobre todo porque no quiero meterme en otro producto que luego me complique.</p>
+                                <p class="mt-2">La <strong>línea de crédito Pro</strong> me suena interesante, pero ¿qué pasa si no la uso? ¿Tiene comisión de no disposición o de mantenimiento? Es lo que me asusta de las revolving.</p>
+                                <p class="mt-2">Y del <strong>seguro de protección de pagos</strong> me preocupa la letra pequeña: ¿qué cuenta exactamente como "caída de ingresos &gt;30%" para un autónomo? Necesitaría ver casos concretos antes de contratarlo.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EMAIL 4.5: IA PROPONE GESTOR HUMANO -->
+                    <div class="email-item pt-4" id="email4_5">
+                        <div class="flex items-start gap-3 mb-2">
+                            <div class="w-10 h-10 border border-gray-200 rounded-full bg-[#004481] flex items-center justify-center shrink-0">
+                                <span class="text-white font-bold text-xs">S</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-[14px] text-[#202124]">Sabadell Asistente <span class="text-xs font-normal text-gray-500">&lt;asistente@bancsabadell.com&gt;</span></span>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-gray-500">
+                                        <span class="text-xs">14:46 (hace 9 minutos)</span>
+                                        <i class="fa-regular fa-face-smile cursor-pointer hover:text-gray-700" title="Añadir reacción"></i>
+                                        <i id="replyIcon4_5" class="fa-solid fa-reply cursor-pointer hover:text-gray-700" title="Responder"></i>
+                                        <i class="fa-solid fa-ellipsis-vertical cursor-pointer hover:text-gray-700"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pl-0 md:pl-12 mt-2 pb-6 border-b border-gray-100 relative">
+                            <div class="text-[14px] text-[#202124] leading-relaxed max-w-3xl">
+                                <p>Es muy razonable que quieras ver la letra pequeña con alguien, Laura. Te confirmo lo más importante para que estés tranquila: <strong>la carencia de tu préstamo la podemos firmar sin tocar nada más</strong>. Los otros dos productos son opcionales y van por separado.</p>
+                                <p class="mt-4">Para que veas el contrato del seguro con casos reales (qué cubre exactamente para autónomos, plazos de carencia, exclusiones) y revises las condiciones de la línea de crédito sin presión, lo más útil es una llamada con un gestor humano.</p>
+                                <p class="mt-2">He consultado disponibilidad con <strong>David Ortiz</strong>, gestor especialista en autónomos de tu oficina (Pl. Catalunya). En una <strong>videollamada de 20 minutos por Google Meet</strong> te enseña los condicionados en pantalla, simula contigo escenarios concretos de tu negocio, y si lo ves claro firmáis ahí mismo. Si no, te quedas igual y la carencia ya queda activada.</p>
+                                <p class="mt-4 font-semibold text-[#004481]">Estos son los huecos que tiene esta semana:</p>
+                                <div class="mt-3 flex gap-3 flex-wrap">
+                                    <div class="border border-[#00a3e0] bg-white text-[#004481] px-4 py-2 rounded-md text-[13px] font-medium hover:bg-[#f0f7fc] cursor-pointer transition flex items-center gap-2">
+                                        <i class="fa-regular fa-calendar text-[#00a3e0]"></i> Mañana, 18:00
+                                    </div>
+                                    <div class="border border-[#00a3e0] bg-white text-[#004481] px-4 py-2 rounded-md text-[13px] font-medium hover:bg-[#f0f7fc] cursor-pointer transition flex items-center gap-2">
+                                        <i class="fa-regular fa-calendar text-[#00a3e0]"></i> Jueves, 10:00
+                                    </div>
+                                    <div class="border border-[#00a3e0] bg-white text-[#004481] px-4 py-2 rounded-md text-[13px] font-medium hover:bg-[#f0f7fc] cursor-pointer transition flex items-center gap-2">
+                                        <i class="fa-regular fa-calendar text-[#00a3e0]"></i> Jueves, 16:30
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex gap-3" id="replyArea4_5">
+                                <button id="replyBtn4_5" class="border border-gray-300 rounded-full px-6 py-2 text-[#444746] font-medium text-[14px] hover:bg-[#f1f3f4] transition flex items-center gap-2 cursor-pointer shadow-sm">
+                                    <i class="fa-solid fa-reply"></i> Responder
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COMPOSE 2.8: LAURA ACEPTA REUNIÓN -->
+                    <div class="email-item pt-4" id="compose2_8">
+                        <div class="flex items-start gap-3 mb-2">
+                            <div class="w-10 h-10 bg-blue-600 rounded-full text-white flex items-center justify-center font-bold text-lg shrink-0 z-10 shadow-sm">L</div>
+                            <div class="flex-1 border border-gray-200 rounded-xl shadow-lg bg-white overflow-hidden flex flex-col relative mt-1">
+                                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between text-[14px] text-gray-700 bg-white"><div class="flex items-center"><i class="fa-solid fa-reply mr-3 text-gray-500 text-[13px]"></i><span>Sabadell Asistente <span class="text-gray-500">&lt;asistente@bancsabadell.com&gt;</span></span><i class="fa-solid fa-caret-down text-gray-500 text-[10px] ml-1"></i></div><i class="fa-solid fa-up-right-and-down-left-from-center text-gray-400 text-[12px] cursor-pointer" title="Pantalla completa"></i></div>
+                                <div class="p-5 text-[14px] text-[#202124] min-h-[80px] outline-none bg-white leading-relaxed cursor-text" contenteditable="false">
+                                    <div id="composeBody2_8" class="hidden">
+                                        <p>Me parece muy buena idea, sobre todo poder ver el condicionado del seguro con alguien delante.</p>
+                                        <p class="mt-2">Me viene perfecto el hueco de <strong>mañana a las 18:00</strong>. A esa hora ya he cerrado el local y puedo estar tranquila para revisar todo bien.</p>
+                                    </div>
+                                </div>
+                                <div class="px-4 pt-2 pb-1 border-t border-gray-100 bg-white">
+                                    <div class="flex items-center gap-2 text-gray-500 text-[13px] flex-wrap">
+                                        <i class="fa-solid fa-rotate-left p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-rotate-right p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <span class="px-2 hover:bg-gray-100 rounded cursor-pointer">Sans Serif <i class="fa-solid fa-caret-down text-[10px] ml-0.5"></i></span>
+                                        <i class="fa-solid fa-text-height p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <span class="w-px h-4 bg-gray-200"></span>
+                                        <span class="font-bold cursor-pointer hover:bg-gray-100 px-1.5 rounded">B</span>
+                                        <span class="italic cursor-pointer hover:bg-gray-100 px-1.5 rounded">I</span>
+                                        <span class="underline cursor-pointer hover:bg-gray-100 px-1.5 rounded">U</span>
+                                        <i class="fa-solid fa-palette p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <span class="w-px h-4 bg-gray-200"></span>
+                                        <i class="fa-solid fa-align-left p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-list-ol p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-list-ul p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-outdent p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-indent p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-quote-right p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-strikethrough p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                    </div>
+                                </div>
+                                <div class="px-4 py-3 bg-white flex items-center justify-between">
+                                    <div class="flex items-center gap-1">
+                                        <div class="flex items-center bg-[#0b57d0] hover:bg-[#0842a0] text-white rounded-full overflow-hidden shadow-sm transition">
+                                            <button id="sendBtn2_8" class="px-5 py-1.5 font-medium text-sm cursor-pointer">Enviar</button>
+                                            <span class="border-l border-blue-400 px-2 py-1.5 cursor-pointer hover:bg-[#0842a0]"><i class="fa-solid fa-caret-down text-[12px]"></i></span>
+                                        </div>
+                                        <div class="flex items-center gap-1 ml-2 text-gray-500 text-[14px]">
+                                            <span class="px-2 py-1 hover:bg-gray-100 rounded-full cursor-pointer font-bold text-[13px]">A<span class="text-[10px]">a</span></span>
+                                            <i class="fa-solid fa-paperclip p-1.5 hover:bg-gray-100 rounded-full cursor-pointer rotate-45"></i>
+                                            <i class="fa-solid fa-link p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-regular fa-face-smile p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-brands fa-google-drive p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-regular fa-image p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-solid fa-lock p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-solid fa-pen p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-solid fa-ellipsis-vertical p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                        </div>
+                                    </div>
+                                    <i class="fa-regular fa-trash-can p-2 hover:bg-gray-100 rounded-full cursor-pointer text-gray-500"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EMAIL 4.6: ACEPTACIÓN ENVIADA -->
+                    <div class="email-item pt-4" id="email4_6">
+                        <div class="flex items-start gap-3 mb-2">
+                            <div class="w-10 h-10 bg-blue-600 rounded-full text-white flex items-center justify-center font-bold text-lg shrink-0">L</div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-[14px] text-[#202124]">Laura Fernández <span class="text-xs font-normal text-gray-500">&lt;laura.fernandez@gmail.com&gt;</span></span>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-gray-500">
+                                        <span class="text-xs">14:48 (hace 7 minutos)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pl-0 md:pl-12 mt-2 pb-6 border-b border-gray-100">
+                            <div class="text-[14px] text-[#202124] leading-relaxed max-w-3xl">
+                                <p>Me parece muy buena idea, sobre todo poder ver el condicionado del seguro con alguien delante.</p>
+                                <p class="mt-2">Me viene perfecto el hueco de <strong>mañana a las 18:00</strong>. A esa hora ya he cerrado el local y puedo estar tranquila para revisar todo bien.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EMAIL 5: IA CONFIRMA CITA + PIDE CONSENTIMIENTO WHATSAPP -->
+                    <div class="email-item pt-4" id="email5">
+                        <div class="flex items-start gap-3 mb-2">
+                            <div class="w-10 h-10 border border-gray-200 rounded-full bg-[#004481] flex items-center justify-center shrink-0">
+                                <span class="text-white font-bold text-xs">S</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-[14px] text-[#202124]">Sabadell Asistente <span class="text-xs font-normal text-gray-500">&lt;asistente@bancsabadell.com&gt;</span></span>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-gray-500">
+                                        <span class="text-xs">14:50 (hace 5 minutos)</span>
+                                        <i class="fa-regular fa-face-smile cursor-pointer hover:text-gray-700" title="Añadir reacción"></i>
+                                        <i id="replyIcon5" class="fa-solid fa-reply cursor-pointer hover:text-gray-700" title="Responder"></i>
+                                        <i class="fa-solid fa-ellipsis-vertical cursor-pointer hover:text-gray-700"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pl-0 md:pl-12 mt-2 pb-6 border-b border-gray-100 relative">
+                            <div class="text-[14px] text-[#202124] leading-relaxed max-w-3xl">
+                                <p>Hecho, Laura. 🗓️ <strong>Cita reservada con David para mañana a las 18:00.</strong> Te llegará la invitación de Google Meet en un correo aparte.</p>
+                                <p class="mt-3">Para que la llamada cunda, te dejo aquí el <strong>borrador de novación</strong> con tus datos ya cumplimentados. Léelo con calma; David te resolverá cualquier duda en directo y, si todo cuadra, lo firmáis al final de la videollamada con tu Clave Sabadell.</p>
+
+                                <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 my-5 max-w-lg">
+                                    <div class="flex justify-between items-start border-b border-gray-200 pb-3 mb-3">
+                                        <div>
+                                            <p class="font-bold text-[#004481] text-lg">Novación de Préstamo</p>
+                                            <p class="text-xs text-[#00a3e0] uppercase font-bold tracking-widest mt-1">Carencia parcial 3 meses</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <p class="text-sm">Préstamo</p>
+                                        <p class="text-sm font-semibold text-right">PE-2023-9842<br>Saldo 9.842 €</p>
+                                    </div>
+                                    <div class="flex justify-between items-center mb-2 text-gray-600">
+                                        <p class="text-sm">Período carencia</p>
+                                        <p class="text-sm">Dic '25 → Feb '26</p>
+                                    </div>
+                                    <div class="flex justify-between items-center mb-4 text-gray-600">
+                                        <p class="text-sm">Cuota tras carencia</p>
+                                        <p class="text-sm text-right">373 € (vs. 340 € actual)</p>
+                                    </div>
+                                    <button class="w-full bg-[#004481] hover:bg-[#003366] text-white font-bold py-3 rounded-lg flex justify-center items-center gap-2 transition cursor-pointer text-sm tracking-wide">
+                                        VER BORRADOR COMPLETO
+                                    </button>
+                                </div>
+
+                                <p class="mt-4">Para que David te pueda enviar el enlace de la videollamada y un recordatorio cómodo (y, si surgiera cualquier imprevisto, reprogramar fácilmente), <strong>¿nos confirmas el consentimiento para contactarte por WhatsApp</strong> en el número asociado a tu perfil (+34 6**-***-***)?</p>
+
+                                <div class="mt-4 p-5 bg-[#f0f7fc] border border-[#cce4f1] rounded-xl shadow-sm flex items-start gap-3">
+                                    <i class="fa-brands fa-whatsapp text-[#16a34a] text-xl mt-1"></i>
+                                    <div>
+                                        <strong class="text-[#004481] text-[15px]">Contacto por WhatsApp</strong>
+                                        <p class="mt-1 text-[13px] text-[#004481]">Responde a este correo con un simple "OK" para darnos tu consentimiento.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex gap-3" id="replyArea5">
+                                <button id="replyBtn5" class="border border-gray-300 rounded-full px-6 py-2 text-[#444746] font-medium text-[14px] hover:bg-[#f1f3f4] transition flex items-center gap-2 cursor-pointer shadow-sm">
+                                    <i class="fa-solid fa-reply"></i> Responder
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COMPOSE 3: LAURA DA OK A WHATSAPP -->
+                    <div class="email-item pt-4" id="compose3">
+                        <div class="flex items-start gap-3 mb-2">
+                            <div class="w-10 h-10 bg-blue-600 rounded-full text-white flex items-center justify-center font-bold text-lg shrink-0 z-10 shadow-sm">L</div>
+                            <div class="flex-1 border border-gray-200 rounded-xl shadow-lg bg-white overflow-hidden flex flex-col relative mt-1">
+                                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between text-[14px] text-gray-700 bg-white"><div class="flex items-center"><i class="fa-solid fa-reply mr-3 text-gray-500 text-[13px]"></i><span>Sabadell Asistente <span class="text-gray-500">&lt;asistente@bancsabadell.com&gt;</span></span><i class="fa-solid fa-caret-down text-gray-500 text-[10px] ml-1"></i></div><i class="fa-solid fa-up-right-and-down-left-from-center text-gray-400 text-[12px] cursor-pointer" title="Pantalla completa"></i></div>
+                                <div class="p-5 text-[14px] text-[#202124] min-h-[80px] outline-none bg-white leading-relaxed cursor-text" contenteditable="false">
+                                    <div id="composeBody3" class="hidden">
+                                        <p>¡Perfecto, todo claro!</p>
+                                        <p class="mt-2">OK, tenéis mi consentimiento para contactarme por WhatsApp. La verdad es que es como me organizo todo, así que mejor que mejor tener ahí el recordatorio y el enlace. Mañana hablamos con David y cerramos.</p>
+                                        <p class="mt-2">Muchas gracias por gestionarlo así, me voy mucho más tranquila de lo que estaba esta mañana.</p>
+                                    </div>
+                                </div>
+                                <div class="px-4 pt-2 pb-1 border-t border-gray-100 bg-white">
+                                    <div class="flex items-center gap-2 text-gray-500 text-[13px] flex-wrap">
+                                        <i class="fa-solid fa-rotate-left p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-rotate-right p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <span class="px-2 hover:bg-gray-100 rounded cursor-pointer">Sans Serif <i class="fa-solid fa-caret-down text-[10px] ml-0.5"></i></span>
+                                        <i class="fa-solid fa-text-height p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <span class="w-px h-4 bg-gray-200"></span>
+                                        <span class="font-bold cursor-pointer hover:bg-gray-100 px-1.5 rounded">B</span>
+                                        <span class="italic cursor-pointer hover:bg-gray-100 px-1.5 rounded">I</span>
+                                        <span class="underline cursor-pointer hover:bg-gray-100 px-1.5 rounded">U</span>
+                                        <i class="fa-solid fa-palette p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <span class="w-px h-4 bg-gray-200"></span>
+                                        <i class="fa-solid fa-align-left p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-list-ol p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-list-ul p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-outdent p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-indent p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-quote-right p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                        <i class="fa-solid fa-strikethrough p-1 cursor-pointer hover:bg-gray-100 rounded"></i>
+                                    </div>
+                                </div>
+                                <div class="px-4 py-3 bg-white flex items-center justify-between">
+                                    <div class="flex items-center gap-1">
+                                        <div class="flex items-center bg-[#0b57d0] hover:bg-[#0842a0] text-white rounded-full overflow-hidden shadow-sm transition">
+                                            <button id="sendBtn3" class="px-5 py-1.5 font-medium text-sm cursor-pointer">Enviar</button>
+                                            <span class="border-l border-blue-400 px-2 py-1.5 cursor-pointer hover:bg-[#0842a0]"><i class="fa-solid fa-caret-down text-[12px]"></i></span>
+                                        </div>
+                                        <div class="flex items-center gap-1 ml-2 text-gray-500 text-[14px]">
+                                            <span class="px-2 py-1 hover:bg-gray-100 rounded-full cursor-pointer font-bold text-[13px]">A<span class="text-[10px]">a</span></span>
+                                            <i class="fa-solid fa-paperclip p-1.5 hover:bg-gray-100 rounded-full cursor-pointer rotate-45"></i>
+                                            <i class="fa-solid fa-link p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-regular fa-face-smile p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-brands fa-google-drive p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-regular fa-image p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-solid fa-lock p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-solid fa-pen p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                            <i class="fa-solid fa-ellipsis-vertical p-1.5 hover:bg-gray-100 rounded-full cursor-pointer"></i>
+                                        </div>
+                                    </div>
+                                    <i class="fa-regular fa-trash-can p-2 hover:bg-gray-100 rounded-full cursor-pointer text-gray-500"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EMAIL 7: OK ENVIADO -->
+                    <div class="email-item pt-4" id="email7">
+                        <div class="flex items-start gap-3 mb-2">
+                            <div class="w-10 h-10 bg-blue-600 rounded-full text-white flex items-center justify-center font-bold text-lg shrink-0">L</div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-[14px] text-[#202124]">Laura Fernández <span class="text-xs font-normal text-gray-500">&lt;laura.fernandez@gmail.com&gt;</span></span>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-gray-500">
+                                        <span class="text-xs">14:52 (hace 1 minuto)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pl-0 md:pl-12 mt-2 pb-6 border-b border-gray-100">
+                            <div class="text-[14px] text-[#202124] leading-relaxed max-w-3xl">
+                                <p>¡Perfecto, todo claro!</p>
+                                <p class="mt-2">OK, tenéis mi consentimiento para contactarme por WhatsApp. La verdad es que es como me organizo todo, así que mejor que mejor tener ahí el recordatorio y el enlace. Mañana hablamos con David y cerramos.</p>
+                                <p class="mt-2">Muchas gracias por gestionarlo así, me voy mucho más tranquila de lo que estaba esta mañana.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EMAIL 8: DESPEDIDA FINAL -->
+                    <div class="email-item pt-4" id="email8">
+                        <div class="flex items-start gap-3 mb-2">
+                            <div class="w-10 h-10 border border-gray-200 rounded-full bg-[#004481] flex items-center justify-center shrink-0">
+                                <span class="text-white font-bold text-xs">S</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-[14px] text-[#202124]">Sabadell Asistente <span class="text-xs font-normal text-gray-500">&lt;asistente@bancsabadell.com&gt;</span></span>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-gray-500">
+                                        <span class="text-xs">14:53 (justo ahora)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pl-0 md:pl-12 mt-2 pb-12 border-b-0 border-gray-100 relative">
+                            <div class="text-[14px] text-[#202124] leading-relaxed max-w-3xl">
+                                <p>Canal activado, Laura 📱. Gracias a ti por la confianza.</p>
+                                <p class="mt-2">David te escribirá mañana por WhatsApp con el enlace de la videollamada y un recordatorio una hora antes. <strong>Recuerda:</strong> hablar a tiempo es la mejor decisión financiera que puedes tomar.</p>
+                                <p class="mt-2">Hasta mañana. <em>Estamos donde estés.</em></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="newMessageBanner" class="message-banner">
+                        <span>Nuevo mensaje de <span id="bannerSenderName">Sabadell Asistente</span></span>
+                        <span class="banner-link" id="showNewMessageBtn">Mostrar</span>
+                        <span class="banner-link" id="ignoreNewMessageBtn">Ignorar</span>
+                    </div>
+                    <!-- end emails -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const configModal = document.getElementById('configModal');
+            const modeRadios = document.getElementsByName('mode');
+            const delayConfig = document.getElementById('delayConfig');
+            const timeDelayInput = document.getElementById('timeDelay');
+            const startBtn = document.getElementById('startBtn');
+
+            modeRadios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    if (e.target.value === 'auto') {
+                        delayConfig.classList.remove('opacity-50', 'pointer-events-none');
+                    } else {
+                        delayConfig.classList.add('opacity-50', 'pointer-events-none');
+                    }
+                });
+            });
+
+            startBtn.addEventListener('click', () => {
+                const aiMode = document.querySelector('input[name="mode"]:checked').value;
+                const delayMs = parseFloat(timeDelayInput.value) * 1000;
+                configModal.classList.add('opacity-0');
+                setTimeout(() => {
+                    configModal.style.display = 'none';
+                    iniciarFlujo(aiMode, delayMs);
+                }, 300);
+            });
+
+            function typeHTML(el, html, speed, onComplete) {
+                html = html.replace(/\s+/g, ' ').replace(/>\s+</g, '><').trim();
+                el.innerHTML = '';
+                el.classList.remove('hidden');
+                let i = 0;
+                let currentHTML = '';
+                let timeoutId = null;
+                let isSkipped = false;
+
+                const skipTyping = (e) => {
+                    if (e.key === "Alt" || e.key === "Control" || e.key === "Shift" || e.key === "Meta") return;
+                    isSkipped = true;
+                    clearTimeout(timeoutId);
+                    el.innerHTML = html;
+                    document.removeEventListener('keydown', skipTyping);
+                    const container = document.getElementById('scrollContainer');
+                    if (container) {
+                        const rect = el.getBoundingClientRect();
+                        if (rect.bottom > window.innerHeight - 60) {
+                            container.scrollTop += (rect.bottom - window.innerHeight + 80);
+                        }
+                    }
+                    if (onComplete) onComplete();
+                };
+
+                document.addEventListener('keydown', skipTyping);
+
+                function type() {
+                    if (isSkipped) return;
+                    if (i < html.length) {
+                        let char = html.charAt(i);
+                        currentHTML += char;
+                        if (char === '<') {
+                            let tagEnd = html.indexOf('>', i);
+                            if (tagEnd !== -1) {
+                                currentHTML += html.substring(i + 1, tagEnd + 1);
+                                i = tagEnd;
+                            }
+                        }
+                        el.innerHTML = currentHTML + '<span class="typing-cursor">|</span>';
+                        i++;
+                        const container = document.getElementById('scrollContainer');
+                        if (container) {
+                            const rect = el.getBoundingClientRect();
+                            if (rect.bottom > window.innerHeight - 60) {
+                                container.scrollTop += 25;
+                            }
+                        }
+                        timeoutId = setTimeout(type, speed + Math.random() * 15);
+                    } else {
+                        el.innerHTML = currentHTML;
+                        document.removeEventListener('keydown', skipTyping);
+                        if (onComplete) onComplete();
+                    }
+                }
+                type();
+            }
+
+            function iniciarFlujo(aiMode, delayMs) {
+                const sequence = [
+                    { action: 'show', id: 'email1', type: 'auto', delay: 500 },
+                    { action: 'show', id: 'compose1', type: 'click', triggerBtn: 'replyBtn1', altTriggerBtn: 'replyIcon1', hideId: 'replyArea1' },
+                    { action: 'reveal_content', targetId: 'composeBody1', type: 'keydown' },
+                    { action: 'replace', hideId: 'compose1', showId: 'email2', type: 'click', triggerBtn: 'sendBtn1' },
+
+                    { action: 'show', id: 'email3', type: 'ai_response', sender: 'Sabadell Asistente' },
+                    { action: 'show', id: 'compose2', type: 'click', triggerBtn: 'replyBtn2', altTriggerBtn: 'replyIcon2', hideId: 'replyArea2' },
+                    { action: 'reveal_content', targetId: 'composeBody2', type: 'keydown' },
+                    { action: 'replace', hideId: 'compose2', showId: 'email4', type: 'click', triggerBtn: 'sendBtn2' },
+
+                    { action: 'show', id: 'email4_1', type: 'ai_response', sender: 'Sabadell Asistente' },
+                    { action: 'show', id: 'compose2_5', type: 'click', triggerBtn: 'replyBtn4_1', altTriggerBtn: 'replyIcon4_1', hideId: 'replyArea4_1' },
+                    { action: 'reveal_content', targetId: 'composeBody2_5', type: 'keydown' },
+                    { action: 'replace', hideId: 'compose2_5', showId: 'email4_2', type: 'click', triggerBtn: 'sendBtn2_5' },
+
+                    { action: 'show', id: 'email4_3', type: 'ai_response', sender: 'Sabadell Asistente' },
+                    { action: 'show', id: 'compose2_7', type: 'click', triggerBtn: 'replyBtn4_3', altTriggerBtn: 'replyIcon4_3', hideId: 'replyArea4_3' },
+                    { action: 'reveal_content', targetId: 'composeBody2_7', type: 'keydown' },
+                    { action: 'replace', hideId: 'compose2_7', showId: 'email4_4', type: 'click', triggerBtn: 'sendBtn2_7' },
+
+                    { action: 'show', id: 'email4_5', type: 'ai_response', sender: 'Sabadell Asistente' },
+                    { action: 'show', id: 'compose2_8', type: 'click', triggerBtn: 'replyBtn4_5', altTriggerBtn: 'replyIcon4_5', hideId: 'replyArea4_5' },
+                    { action: 'reveal_content', targetId: 'composeBody2_8', type: 'keydown' },
+                    { action: 'replace', hideId: 'compose2_8', showId: 'email4_6', type: 'click', triggerBtn: 'sendBtn2_8' },
+
+                    { action: 'show', id: 'email5', type: 'ai_response', sender: 'Sabadell Asistente' },
+                    { action: 'show', id: 'compose3', type: 'click', triggerBtn: 'replyBtn5', altTriggerBtn: 'replyIcon5', hideId: 'replyArea5' },
+                    { action: 'reveal_content', targetId: 'composeBody3', type: 'keydown' },
+                    { action: 'replace', hideId: 'compose3', showId: 'email7', type: 'click', triggerBtn: 'sendBtn3' },
+
+                    { action: 'show', id: 'email8', type: 'ai_response', sender: 'Sabadell Asistente' }
+                ];
+
+                const container = document.getElementById('scrollContainer');
+                let currentStep = 0;
+
+                function animateIn(el) {
+                    el.classList.add('active');
+                    void el.offsetWidth;
+                    el.classList.add('visible');
+                }
+
+                function scrollAfter(targetEl) {
+                    setTimeout(() => {
+                        const parentItem = targetEl.closest('.email-item') || targetEl;
+                        const topPos = parentItem.offsetTop - 70;
+                        container.scrollTo({ top: topPos, behavior: 'smooth' });
+                    }, 50);
+                }
+
+                function showNext() {
+                    if (currentStep >= sequence.length) return;
+                    const step = sequence[currentStep];
+                    let targetEl = null;
+
+                    if (step.action === 'show') {
+                        targetEl = document.getElementById(step.id);
+                        if (targetEl) animateIn(targetEl);
+                        if (step.hideId) {
+                            const hEl = document.getElementById(step.hideId);
+                            if (hEl) hEl.style.display = 'none';
+                        }
+                    } else if (step.action === 'replace') {
+                        const hideEl = document.getElementById(step.hideId);
+                        targetEl = document.getElementById(step.showId);
+                        if (hideEl) {
+                            hideEl.classList.remove('visible', 'active');
+                            hideEl.style.display = 'none';
+                        }
+                        if (targetEl) animateIn(targetEl);
+                    } else if (step.action === 'reveal_content') {
+                        const contentEl = document.getElementById(step.targetId);
+                        if (contentEl) {
+                            if (!contentEl.dataset.typed) {
+                                contentEl.dataset.typed = 'true';
+                                const htmlContent = contentEl.innerHTML;
+                                typeHTML(contentEl, htmlContent, 10);
+                            } else {
+                                contentEl.classList.remove('hidden');
+                            }
+                        }
+                        targetEl = contentEl;
+                    }
+
+                    if (targetEl) scrollAfter(targetEl);
+                    currentStep++;
+                    setupTriggerForCurrentStep();
+                }
+
+                function triggerNewMessageAlert(step) {
+                    const banner = document.getElementById('newMessageBanner');
+                    const targetEl = document.getElementById(step.id);
+                    const senderName = step.sender || 'Banco Sabadell';
+
+                    document.getElementById('bannerSenderName').innerText = senderName;
+                    targetEl.parentNode.insertBefore(banner, targetEl);
+
+                    banner.style.display = 'flex';
+                    void banner.offsetWidth;
+                    banner.classList.add('visible-banner');
+
+                    setTimeout(() => {
+                        const topPos = banner.offsetTop - 70;
+                        container.scrollTo({ top: topPos, behavior: 'smooth' });
+                    }, 50);
+
+                    const showBtn = document.getElementById('showNewMessageBtn');
+                    const ignoreBtn = document.getElementById('ignoreNewMessageBtn');
+
+                    const onShow = () => {
+                        banner.classList.remove('visible-banner');
+                        setTimeout(() => {
+                            banner.style.display = 'none';
+                            showNext();
+                        }, 300);
+                        showBtn.removeEventListener('click', onShow);
+                        ignoreBtn.removeEventListener('click', onIgnore);
+                    };
+
+                    const onIgnore = () => {
+                        banner.classList.remove('visible-banner');
+                        setTimeout(() => banner.style.display = 'none', 300);
+                        showBtn.removeEventListener('click', onShow);
+                        ignoreBtn.removeEventListener('click', onIgnore);
+                    };
+
+                    showBtn.addEventListener('click', onShow);
+                    ignoreBtn.addEventListener('click', onIgnore);
+                }
+
+                function setupTriggerForCurrentStep() {
+                    if (currentStep >= sequence.length) return;
+                    const nextStep = sequence[currentStep];
+
+                    if (nextStep.type === 'auto') {
+                        setTimeout(showNext, nextStep.delay || 0);
+                    } else if (nextStep.type === 'click') {
+                        const btn = document.getElementById(nextStep.triggerBtn);
+                        const altBtn = nextStep.altTriggerBtn ? document.getElementById(nextStep.altTriggerBtn) : null;
+                        const onClick = function() {
+                            if (btn) btn.removeEventListener('click', onClick);
+                            if (altBtn) altBtn.removeEventListener('click', onClick);
+                            showNext();
+                        };
+                        if (btn) btn.addEventListener('click', onClick);
+                        if (altBtn) altBtn.addEventListener('click', onClick);
+                    } else if (nextStep.type === 'keydown') {
+                        const revealHandler = (e) => {
+                            if (e.key !== "Alt" && e.key !== "Control" && e.key !== "Shift" && e.key !== "Meta") {
+                                e.preventDefault();
+                                document.removeEventListener('keydown', revealHandler);
+                                showNext();
+                            }
+                        };
+                        document.addEventListener('keydown', revealHandler);
+                    } else if (nextStep.type === 'ai_response') {
+                        const triggerFn = () => { triggerNewMessageAlert(nextStep); };
+                        if (aiMode === 'auto') {
+                            setTimeout(triggerFn, delayMs);
+                        } else {
+                            const aiKeydownHandler = (e) => {
+                                if (e.key !== "Alt" && e.key !== "Control" && e.key !== "Shift" && e.key !== "Meta") {
+                                    document.removeEventListener('keydown', aiKeydownHandler);
+                                    triggerFn();
+                                }
+                            };
+                            document.addEventListener('keydown', aiKeydownHandler);
+                        }
+                    }
+                }
+
+                setupTriggerForCurrentStep();
+            }
+        });
+    </script>
+</body>
+</html>
